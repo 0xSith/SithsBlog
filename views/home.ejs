@@ -4,10 +4,11 @@
 
 <%= homeContent %>
 
-
-<h1><%=postTitle%></h1>
-<%=postBody.slice(0,149) + "..."%>
-<a href="http://localhost:3000/posts/<%=postTitle%>"> Read More</a>
+<%foundPosts.forEach(post => {%>
+  <h1><%=post.title%></h1>
+  <%=post.body.slice(0,149) + "..."%>
+  <a href="http://localhost:3000/posts/<%=post.title%>"> Read More</a>
+<%})%>
 
 
 <%- include("partials/footer") -%>

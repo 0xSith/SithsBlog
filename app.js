@@ -22,27 +22,35 @@ app.use(express.static("public"));
 
 //Database Init
 
-mongoose.connect('mongodb://localhost:27017/blogDB');
+mongoose.connect('mongodb+srv://<username>:<password>@clusterfree.rlegb.mongodb.net/blogDB');
 
-const blogSchema = new mongoose.Schema({
+const postSchema = new mongoose.Schema({
   title: String,
-  post: String
+  body: String
 });
 
-Blog = mongoose.model("Blog", blogSchema);
+Post = mongoose.model("Post", postSchema);
 
+
+
+app.post("/compose", (req, res) => {
+  const post = new Post({
+    title: req.body.postTitle,
+    body: req.body.postBody
+  });
+  post.save();
+  res.redirect("/");
+})
 
 
 
 app.get("/", (req, res) => {
-  Blog.findOne({},(err,foundBlog) => {
-    if(!err){
-      console.log(foundBlog.title);
-      console.log(foundBlog.post);
+
+  Post.find({}, (err, foundPosts) => {
+    if (!err) {
       res.render("home", {
         homeContent: homeStartingContent,
-        postTitle: foundBlog.title,
-        postBody: foundBlog.post
+        foundPosts: foundPosts
       });
     }
   })
@@ -66,31 +74,29 @@ app.get("/compose", (req, res) => {
 
 app.get("/posts/:postId", (req, res) => {
 
-  for (let i = 0; i < posts.length; i++) {
-    const reqTitle = _.lowerCase(req.params.postId);
-    const savedTitle = _.lowerCase(posts[i].title);
-    if (reqTitle === savedTitle) {
-      res.render("post", {
-        postTitle: posts[i].title,
-        postBody: posts[i].body
-      });
+  Post.find({}, (err,foundPosts) => {
+    if(!err){
+    for (let i = 0; i < foundPosts.length; i++) {
+      const reqTitle = _.lowerCase(req.params.postId);
+      const savedTitle = _.lowerCase(foundPosts[i].title);
+      if (reqTitle === savedTitle) {
+        res.render("post", {
+          postTitle: foundPosts[i].title,
+          postBody: foundPosts[i].body
+        });
+      }
     }
   }
+  })
 })
 
 
-app.post("/compose", (req, res) => {
-  const blog = new Blog ({
-    title: req.body.postTitle,
-    post: req.body.postBody
-  });
-  blog.save();
-  res.redirect("/");
-})
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
 
 
-
-
-app.listen(3000, function() {
+app.listen(port, function() {
   console.log("Server started on port 3000");
 });
